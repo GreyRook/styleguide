@@ -1,18 +1,8 @@
 <?xml version = '1.0'?>
 <?xml-stylesheet type="text/xsl" href="styleguide.xsl"?>
-<GUIDE title="Google JavaScript Style Guide">
-  <p class="revision">
-
-    Revision 2.93
-  </p>
-
+<GUIDE title="Grey Rook JavaScript Style Guide">
   <address>
-    Aaron Whyte<br/>
-    Bob Jervis<br/>
-    Dan Pupius<br/>
-    Erik Arvidsson<br/>
-    Fritz Schneider<br/>
-    Robby Walker<br/>
+      Based on https://google.github.io/styleguide/javascriptguide.xml
   </address>
   <OVERVIEW>
     <CATEGORY title="Important Note">
@@ -36,22 +26,15 @@
       <p>
         JavaScript is the main client-side scripting language used
 
-        by many of Google's open-source
+        by many open-source
           projects.
         This style guide is a list of <em>do</em>s and <em>don't</em>s for
         JavaScript programs.
       </p>
 
-
-
-
-
     </CATEGORY>
   </OVERVIEW>
   <CATEGORY title="JavaScript Language Rules">
-
-
-
 
     <STYLEPOINT title="var">
       <SUMMARY>
@@ -135,7 +118,7 @@
                * Request timeout in milliseconds.
                * @type {number}
                */
-              goog.example.TIMEOUT_IN_MILLISECONDS = 60;
+              var TIMEOUT_IN_MILLISECONDS = 60;
             </CODE_SNIPPET>
 
             <p>The number of seconds in a minute never changes.  It is a
@@ -153,7 +136,7 @@
                * Map of URL to response string.
                * @const
                */
-              MyClass.fetchedUrlCache_ = new goog.structs.Map();
+              MyClass._fetchedUrlCache = new Map();
             </CODE_SNIPPET>
 
             <CODE_SNIPPET>
@@ -354,22 +337,27 @@
           prototype. These hierarchies are much harder to get right than they
           first appear! </p>
 
-        <p>For that reason, it is best to use <code>goog.inherits()</code> from
-          <a href="https://code.google.com/closure/library/">
-            the Closure Library
-          </a>
-          or a similar library function.
-        </p>
+        <p>One class can only inherit from one other class. To do this we use the
+            native Javascript prototype and Object ways of inheritance:</p>
         <CODE_SNIPPET>
-          function D() {
-            goog.base(this)
-          }
-          goog.inherits(D, B);
+            function D() {
+                B.call(this);
+                ...
+            }
 
-          D.prototype.method = function() {
-            ...
-          };
+            D.prototype = Object.create(B.prototype);
+
+            D.prototype.method = function() {
+                ...
+            }
         </CODE_SNIPPET>
+
+        <p>In some cases it is necessary to inherit from more than one class. In
+            this case we inherit from one class like above and use GOWN.mixin
+            to merge the prototypes of the other classes into the current class.</p>
+
+        <p>For more Information about GOWN see <a href="https://github.com/brean/gown.js">https://github.com/brean/gown.js</a></p>
+
       </BODY>
     </STYLEPOINT>
 
@@ -411,13 +399,13 @@
       <BODY>
         <CODE_SNIPPET>
           Foo.prototype.dispose = function() {
-            this.property_ = null;
+            this._property = null;
           };
         </CODE_SNIPPET>
         <p>Instead of:</p>
         <BAD_CODE_SNIPPET>
           Foo.prototype.dispose = function() {
-            delete this.property_;
+            delete this._property;
           };
         </BAD_CODE_SNIPPET>
         <p>In modern JavaScript engines, changing the number of properties on an
@@ -733,10 +721,10 @@
         <SUBSECTION title="Properties and methods">
           <ul>
             <li><em>Private</em> properties and methods should be named with a
-              trailing underscore.
+              leading underscore.
               </li>
             <li><em>Protected</em> properties and methods should be
-              named without a trailing underscore (like public ones).</li>
+              named without a leading underscore (like public ones).</li>
           </ul>
           <p>For more information on <em>private</em> and <em>protected</em>,
             read the section on
@@ -744,13 +732,10 @@
               visibility</a>.
             </p>
 
-
-
-
         </SUBSECTION>
 
         <SUBSECTION title="Method and function parameter">
-          <p>Optional function arguments start with <code>opt_</code>.</p>
+          <p>Optional function arguments should start with <code>opt_</code>.</p>
           <p>Functions that take a variable number of arguments should have the
             last argument named <code>var_args</code>. You may not refer to
             <code>var_args</code> in the code; use the <code>arguments</code>
@@ -771,6 +756,27 @@
                */
               var foo = { get next() { return this.nextId++; } };
             </BAD_CODE_SNIPPET>
+            <p>We still use getters and setters in combination with properties
+                on objects like follows:</p>
+            <CODE_SNIPPET>
+                MyClass.prototype.getPropertyValue = function() {
+                    return this._propertyValue;
+                };
+
+                MyClass.prototype.setPropertyValue = function(value) {
+                    this._propertyValue = value;
+                };
+
+                Object.defineProperty(MyClass.prototype, 'propertyName', {
+                    'get': getPropertyValue,
+                    'set': setPropertyValue
+                });
+            </CODE_SNIPPET>
+            <p>There also is <code>Object.defineProperties(...)</code> that lets
+            you set multiple properties at once.</p>
+            <p>How this works is if that property is set or called the getter or
+            setter is called. This allows for more control over what properties
+            are available and how and what values are set.</p>
         </SUBSECTION>
 
         <SUBSECTION title="Accessor functions">
@@ -893,8 +899,7 @@
                 staticHelper(new MyClass());
               };
             </CODE_SNIPPET>
-            <p>Do not create local aliases of namespaces. Namespaces should only
-              be aliased using <a href="#goog-scope">goog.scope</a>.</p>
+            <p>Do not create local aliases of namespaces.
             <BAD_CODE_SNIPPET>
               myapp.main = function() {
                 var namespace = some.long.namespace;
@@ -1001,31 +1006,31 @@
             var obj = {a: 1, b: 2, c: 3};  // No space after { or before }.
           </CODE_SNIPPET>
           <p>Multiline array initializers and object initializers are indented
-            2 spaces, with the braces on their own line, just like blocks.</p>
+            4 spaces, with the braces on their own line, just like blocks.</p>
           <CODE_SNIPPET>
             // Object initializer.
             var inset = {
-              top: 10,
-              right: 20,
-              bottom: 15,
-              left: 12
+                top: 10,
+                right: 20,
+                bottom: 15,
+                left: 12
             };
 
             // Array initializer.
-            this.rows_ = [
-              '"Slartibartfast" &lt;fjordmaster@magrathea.com&gt;',
-              '"Zaphod Beeblebrox" &lt;theprez@universe.gov&gt;',
-              '"Ford Prefect" &lt;ford@theguide.com&gt;',
-              '"Arthur Dent" &lt;has.no.tea@gmail.com&gt;',
-              '"Marvin the Paranoid Android" &lt;marv@googlemail.com&gt;',
-              'the.mice@magrathea.com'
+            this._rows = [
+                '"Slartibartfast" &lt;fjordmaster@magrathea.com&gt;',
+                '"Zaphod Beeblebrox" &lt;theprez@universe.gov&gt;',
+                '"Ford Prefect" &lt;ford@theguide.com&gt;',
+                '"Arthur Dent" &lt;has.no.tea@gmail.com&gt;',
+                '"Marvin the Paranoid Android" &lt;marv@googlemail.com&gt;',
+                'the.mice@magrathea.com'
             ];
 
             // Used in a method call.
-            goog.dom.createDom(goog.dom.TagName.DIV, {
-              id: 'foo',
-              className: 'some-css-class',
-              style: 'display:none'
+            dom.createDom(dom.TagName.DIV, {
+                id: 'foo',
+                className: 'some-css-class',
+                style: 'display:none'
             }, 'Hello, world!');
           </CODE_SNIPPET>
           <p>Long identifiers or values present problems for aligned
@@ -1033,17 +1038,17 @@
             For example:</p>
           <CODE_SNIPPET>
             CORRECT_Object.prototype = {
-              a: 0,
-              b: 1,
-              lengthyName: 2
+                a: 0,
+                b: 1,
+                lengthyName: 2
             };
           </CODE_SNIPPET>
           <p>Not like this:</p>
           <BAD_CODE_SNIPPET>
             WRONG_Object.prototype = {
-              a          : 0,
-              b          : 1,
-              lengthyName: 2
+                a          : 0,
+                b          : 1,
+                lengthyName: 2
             };
           </BAD_CODE_SNIPPET>
         </SUBSECTION>
@@ -1108,86 +1113,28 @@
         <SUBSECTION title="Passing Anonymous Functions">
           <p>When declaring an anonymous function in the list of arguments for
             a function call, the body of the function is indented two spaces
-            from the left edge of the statement, or two spaces from the left
+            from the left edge of the statement, or four spaces from the left
             edge of the function keyword. This is to make the body of the
             anonymous function easier to read (i.e. not be all squished up into
             the right half of the screen).</p>
           <CODE_SNIPPET>
             prefix.something.reallyLongFunctionName('whatever', function(a1, a2) {
-              if (a1.equals(a2)) {
-                someOtherLongFunctionName(a1);
-              } else {
-                andNowForSomethingCompletelyDifferent(a2.parrot);
-              }
+                if (a1.equals(a2)) {
+                    someOtherLongFunctionName(a1);
+                } else {
+                    andNowForSomethingCompletelyDifferent(a2.parrot);
+                }
             });
 
             var names = prefix.something.myExcellentMapFunction(
                 verboselyNamedCollectionOfItems,
                 function(item) {
-                  return item.name;
+                    return item.name;
                 });
           </CODE_SNIPPET>
         </SUBSECTION>
-        <SUBSECTION title="Aliasing with goog.scope">
-          <a name="goog-scope"/>
-          <p>
-            <a href="https://docs.google.com/document/pub?id=1ETFAuh2kaXMVL-vafUYhaWlhl6b5D9TOvboVg7Zl68Y"><code>goog.scope</code></a>
-            may be used to shorten references to
-            namespaced symbols in programs using
-            <a href="https://code.google.com/closure/library/">the Closure
-              Library</a>.</p>
-          <p>Only one <code>goog.scope</code> invocation may be added per
-            file.  Always place it in the global scope.</p>
-          <p>The opening <code>goog.scope(function() {</code> invocation
-            must be preceded by exactly one blank line and follow any
-            <code>goog.provide</code> statements, <code>goog.require</code>
-            statements, or top-level comments.  The invocation must be closed on
-            the last line in the file.  Append <code>// goog.scope</code> to the
-            closing statement of the scope. Separate the comment from the
-            semicolon by two spaces.</p>
-          <p>Similar to C++ namespaces, do not indent under goog.scope
-            declarations. Instead, continue from the 0 column.</p>
-          <p>Only alias names that will not be re-assigned to another object
-            (e.g., most constructors, enums, and namespaces). Do not do
-            this (see below for how to alias a constructor):</p>
-
-          <BAD_CODE_SNIPPET>
-            goog.scope(function() {
-            var Button = goog.ui.Button;
-
-            Button = function() { ... };
-            ...
-          </BAD_CODE_SNIPPET>
-
-          <p>Names must be the same as the last property of the global that they
-            are aliasing.</p>
-
-          <CODE_SNIPPET>
-            goog.provide('my.module.SomeType');
-
-            goog.require('goog.dom');
-            goog.require('goog.ui.Button');
-
-            goog.scope(function() {
-            var Button = goog.ui.Button;
-            var dom = goog.dom;
-
-            // Alias new types <b>after</b> the constructor declaration.
-            my.module.SomeType = function() { ... };
-            var SomeType = my.module.SomeType;
-
-            // Declare methods on the prototype as usual:
-            SomeType.prototype.findButton = function() {
-              // Button as aliased above.
-              this.button = new Button(dom.getElement('my-button'));
-            };
-            ...
-            });  // goog.scope
-          </CODE_SNIPPET>
-        </SUBSECTION>
         <SUBSECTION title="Indenting wrapped lines">
-          <p>Except for <a href="#Array_and_Object_literals">array literals,
-            object literals</a>, and anonymous functions, all wrapped lines
+          <p>All wrapped lines
             should be indented either left-aligned to a sibling expression
             above, or four spaces (not two spaces) deeper than a parent
             expression (where "sibling" and "parent" refer to parenthesis
@@ -1241,7 +1188,7 @@
         <SUBSECTION title="Binary and Ternary Operators">
           <p>Always put the operator on the preceding line. Otherwise,
             line breaks and indentation follow the same rules as in other
-            Google style guides. This operator placement was initially agreed
+            Grey Rook style guides. This operator placement was initially agreed
             upon out of concerns about automatic semicolon insertion. In fact,
             semicolon insertion cannot happen before a binary operator, but new
             code should stick to this style for consistency.</p>
@@ -1315,22 +1262,22 @@
           annotated <code>@protected</code>.</p>
         <CODE_SNIPPET>
           // File 1.
-          // AA_PrivateClass_ and AA_init_ are accessible because they are global
+          // _AA_PrivateClass and _AA_init are accessible because they are global
           // and in the same file.
 
           /**
            * @private
            * @constructor
            */
-          AA_PrivateClass_ = function() {
+          _AA_PrivateClass = function() {
           };
 
           /** @private */
-          function AA_init_() {
-            return new AA_PrivateClass_();
+          function _AA_init() {
+            return new _AA_PrivateClass();
           }
 
-          AA_init_();
+          _AA_init();
         </CODE_SNIPPET>
         <p><code>@private</code> properties are accessible to all code in the
           same file, plus all static methods and instance methods of that class
@@ -1350,20 +1297,20 @@
           /** @constructor */
           AA_PublicClass = function() {
             /** @private */
-            this.privateProp_ = 2;
+            this._privateProp = 2;
 
             /** @protected */
             this.protectedProp = 4;
           };
 
           /** @private */
-          AA_PublicClass.staticPrivateProp_ = 1;
+          AA_PublicClass._staticPrivateProp = 1;
 
           /** @protected */
           AA_PublicClass.staticProtectedProp = 31;
 
           /** @private */
-          AA_PublicClass.prototype.privateMethod_ = function() {};
+          AA_PublicClass.prototype._privateMethod = function() {};
 
           /** @protected */
           AA_PublicClass.prototype.protectedMethod = function() {};
@@ -1375,7 +1322,7 @@
            */
           AA_PublicClass.prototype.method = function() {
             // Legal accesses of these two properties.
-            return this.privateProp_ + AA_PublicClass.staticPrivateProp_;
+            return this._privateProp + AA_PublicClass._staticPrivateProp;
           };
 
           // File 3.
@@ -1385,10 +1332,11 @@
            * @extends {AA_PublicClass}
            */
           AA_SubClass = function() {
+            AA_PublicClass.call(this);
             // Legal access of a protected static property.
             AA_PublicClass.staticProtectedProp = this.method();
           };
-          goog.inherits(AA_SubClass, AA_PublicClass);
+          AA_SubClass.prototype = Object.create(AA_PublicClass.prototype);
 
           /**
            * @return {number} The number of ducks we've arranged in a row.
@@ -2070,12 +2018,12 @@
                * @type {Object}
                * @private
                */
-              this.myValue_ = value;
+              this._myValue = value;
             }
           </CODE_SNIPPET>
 
-          <p>tells the compiler that the <code>myValue_</code> property holds
-            either an Object or null.  If <code>myValue_</code> must never be
+          <p>tells the compiler that the <code>_myValue</code> property holds
+            either an Object or null.  If <code>_myValue</code> must never be
             null, it should be declared like this:</p>
 
           <CODE_SNIPPET>
@@ -2090,7 +2038,7 @@
                * @type {!Object}
                * @private
                */
-              this.myValue_ = value;
+              this._myValue = value;
             }
           </CODE_SNIPPET>
 
@@ -2116,7 +2064,7 @@
                * @type {Object|undefined}
                * @private
                */
-              this.myValue_ = opt_value;
+              this._myValue = opt_value;
             }
           </CODE_SNIPPET>
 
@@ -3024,7 +2972,7 @@
                      * Handlers that are listening to this logger.
                      * @private {!Array.&lt;Function&gt;}
                      */
-                    this.handlers_ = [];
+                    this._handlers = [];
                   </CODE_SNIPPET>
                 </td>
                 <td>
@@ -3072,7 +3020,7 @@
                      * @suppress {visiblity} Referencing this outside this package is strongly
                      * discouraged.
                      */
-                     goog.events.Event.prototype.propagationStopped_ = false;
+                     goog.events.Event.prototype._propagationStopped = false;
                   </CODE_SNIPPET>
                 </td>
                 <td>
@@ -3315,7 +3263,7 @@
             <a href="https://code.google.com/p/jsdoc-toolkit/wiki/TagReference">
               JSDoc Toolkit Tag Reference
             </a>
-            but are currently discouraged in Google code. You should consider
+            but are currently discouraged in Grey Rook code. You should consider
             them "reserved" names for future use. These include:
             <ul>
               <li>@augments</li>
@@ -3583,8 +3531,6 @@
     </STYLEPOINT>
   </CATEGORY>
 
-
-
   <PARTING_WORDS>
     <p>
       <em>BE CONSISTENT</em>.
@@ -3609,18 +3555,4 @@
     </p>
 
   </PARTING_WORDS>
-
-  <p align="right">
-    Revision 2.93
-  </p>
-
-
-  <address>
-    Aaron Whyte<br/>
-    Bob Jervis<br/>
-    Dan Pupius<br/>
-    Erik Arvidsson<br/>
-    Fritz Schneider<br/>
-    Robby Walker<br/>
-  </address>
 </GUIDE>
