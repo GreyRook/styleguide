@@ -1,7 +1,7 @@
 Grey Rook Style Guides
 ======================
 
-These style guides are based on [Google's Open Source Style Guides][https://github.com/google/styleguide].
+These style guides are based on [Google's Open Source Style Guides](https://github.com/google/styleguide).
 
 Every major open-source project has its own style guide: a set of conventions
 (sometimes arbitrary) about how to write code for that project. It is much
