@@ -899,7 +899,7 @@
                 staticHelper(new MyClass());
               };
             </CODE_SNIPPET>
-            <p>Do not create local aliases of namespaces.
+            <p>Do not create local aliases of namespaces.</p>
             <BAD_CODE_SNIPPET>
               myapp.main = function() {
                 var namespace = some.long.namespace;
