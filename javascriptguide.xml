@@ -3250,12 +3250,8 @@
                 </td>
               </tr>
 
-
-
             </tbody>
           </table>
-
-
 
           <p>
             You may also see other types of JSDoc annotations in third-party
@@ -3296,51 +3292,13 @@
       </BODY>
     </STYLEPOINT>
 
-    <STYLEPOINT title="Providing Dependencies With goog.provide">
-      <SUMMARY>
-        Only provide top-level symbols.
-      </SUMMARY>
-      <BODY>
-        <p>
-          All members defined on a class should be in the same file. So, only
-          top-level classes should be provided in a file that contains multiple
-          members defined on the same class (e.g. enums, inner classes, etc).
-        </p>
-        <p>Do this:</p>
-        <CODE_SNIPPET>
-          goog.provide('namespace.MyClass');
-        </CODE_SNIPPET>
-        <p>Not this:</p>
-        <BAD_CODE_SNIPPET>
-          goog.provide('namespace.MyClass');
-          goog.provide('namespace.MyClass.Enum');
-          goog.provide('namespace.MyClass.InnerClass');
-          goog.provide('namespace.MyClass.TypeDef');
-          goog.provide('namespace.MyClass.CONSTANT');
-          goog.provide('namespace.MyClass.staticMethod');
-        </BAD_CODE_SNIPPET>
-        <p>
-          Members on namespaces may also be provided:
-        </p>
-        <CODE_SNIPPET>
-          goog.provide('foo.bar');
-          goog.provide('foo.bar.method');
-          goog.provide('foo.bar.CONSTANT');
-        </CODE_SNIPPET>
-      </BODY>
-    </STYLEPOINT>
-
     <STYLEPOINT title="Compiling">
       <SUMMARY>Required</SUMMARY>
       <BODY>
 
-
         <p>Use of JS compilers such as the
           <a href="https://code.google.com/closure/compiler/">Closure Compiler</a>
           is required for all customer-facing code.</p>
-
-
-
 
       </BODY>
     </STYLEPOINT>
@@ -3527,6 +3485,110 @@
             }
           </CODE_SNIPPET>
         </SUBSECTION>
+      </BODY>
+    </STYLEPOINT>
+  </CATEGORY>
+  <CATEGORY title="Karma Unit Tests">
+    <STYLEPOINT title="What are (Karma) Unit Tests">
+      <SUMMARY>
+        What it's all about
+      </SUMMARY>
+      <BODY>
+        <p>With unit tests the smallest unit inside of your code is tested. This
+          is typically a function or a module. The test itself checks if, given
+          an input, the unit returns the expected output or behaves in an expected
+          way.
+        </p>
+        <p>For code to be testable by unit tests it has to be written in a modular
+          way. Code in this form is very easily tested because each module can
+          be tested separately.
+        </p>
+        <p>With unit tests errors are made visible. If executed regularly after
+          changes errors from unexpected dependencies are made visible. This way
+          the functionality of the tested code is always ensured.
+        </p>
+      </BODY>
+    </STYLEPOINT>
+    <STYLEPOINT title="Using Karma Unit Tests">
+      <SUMMARY>
+        As often as possible
+      </SUMMARY>
+      <BODY>
+        <p>Not everything is easily tested with Karma Unit Tests. But where it is
+          possible it should be used. For this the code itself has to be written
+          in a modular way what makes it easier to understand too.
+        </p>
+        <p>It's a good way to write the tests first and then develop the code until
+          all tests pass.
+        </p>
+      </BODY>
+    </STYLEPOINT>
+    <STYLEPOINT title="Getting started with Karma">
+        <SUMMARY>
+          Helpful information
+        </SUMMARY>
+        <BODY>
+          <p>Karma is a node module and is installed as such with <code>npm install
+            karma</code>. That alone is not enough though, but what you install after
+            that is up to you. We recommend using jasmine as testing framework with
+            the phantomjs browser. For this you need to install <code>karma-jasmine
+             karma-phantomjs-launcher phantomjs jasmine-corekarma-jasmine
+             karma-phantomjs-launcher phantomjs jasmine-core</code> too. For more
+             information visit the <a href="https://karma-runner.github.io/latest/intro/installation.html">
+             Karma introduction page about installing karma</a>.
+          </p>
+          <p>The configuration file needed for Karma is easily generated
+            by <code>Karma init my.conf.js</code>. For more information about the
+            configuration file visit the <a href="https://karma-runner.github.io/latest/intro/configuration.html">
+            Karma introduction page about the Karma configuration</a>.
+          </p>
+          <p>To start Karma just type <code>karma start [path/to/config]</code>
+            into the terminal. If you call karma in the same folder as the config
+            and the config has the default name (karma.conf.js) you can omit the
+            path to the config.</p>
+          <p><a href="https://git.srv.r0k.de/m.friedrich/karma_example">Here</a>
+            you can find an example project for Karma.</p>
+        </BODY>
+    </STYLEPOINT>
+
+    <STYLEPOINT title="Jasmine">
+        <SUMMARY>
+          The way unit tests are written
+        </SUMMARY>
+        <BODY>
+          <p>Jasmine is the framework that provides the structure and actual
+            testing mechanics to write tests with karma. A basic test written
+            with Jasmine might look something like this:
+          </p>
+          <CODE_SNIPPET>
+            describe('My first Karma Test', function() {
+
+                it('Test add function', function() {
+                    expect(add(3, 3)).toBe(6);
+                });
+            });
+          </CODE_SNIPPET>
+          <p>With <code>describe</code> you can define test-blocks, consisting
+            of multiple unit tests and with <code>it</code> a unit test is defined.
+            Inside you can test as much and as little as you want, but it makes
+            sense to have one unit tests for each test-case to increase readability
+            of the executed unit tests.
+          </p>
+          <p>Inside of unit tests Jasmine provides many ways to check values.
+            <a href="http://jasmine.github.io/2.4/introduction.html">Go here</a>
+            to learn what is possible.
+          </p>
+        </BODY>
+    </STYLEPOINT>
+  </CATEGORY>
+  <CATEGORY title="Eslint">
+    <STYLEPOINT title="Using Eslint">
+      <SUMMARY>
+        Always
+      </SUMMARY>
+      <BODY>
+        <p><a href="http://eslint.org/docs/user-guide/getting-started">Learn more here</a>
+        </p>
       </BODY>
     </STYLEPOINT>
   </CATEGORY>
