@@ -3582,12 +3582,87 @@
     </STYLEPOINT>
   </CATEGORY>
   <CATEGORY title="Eslint">
-    <STYLEPOINT title="Using Eslint">
+      <STYLEPOINT title="What is Eslint?">
+        <SUMMARY>
+        A short introduction
+        </SUMMARY>
+        <BODY>
+        <p>You might ask yourself: what is eslint and why do I need it? Well,
+          the way karma ensures the correct functionality (or semantic) of
+          your code eslint ensures that your code is in the correct syntax.
+          So even if your code has the correct semantic and works just fine,
+          eslint can find things that are not the way you want them to be.
+          It is a good way to enforce a styleguide for your project for every
+          developer who contributes to it.
+        </p>
+        <p>An example output of eslint can look something like this:
+        </p>
+        <CODE_SNIPPET>
+            [path/to/the/testet/file]
+            5:31  error  Missing semicolon                                       semi
+            7:3   error  Identifier 'my_function' is not in camel case           camelcase
+            8:5   error  Expected indentation of 2 space characters but found 4  indent
+            9:2   error  Missing semicolon                                       semi
+
+            ✖ 4 problems (4 errors, 0 warnings)
+        </CODE_SNIPPET>
+        <p>There are errors and warnings. Errors have to be corrected, warnings
+            can be ignored (although we do not recommend this). At the end of each
+            line the rule that caused the error is displayed. These rules can
+            be provided by you or you use a public configuration. In this case
+            the esling configuration of google was used.
+        </p>
+        </BODY>
+      </STYLEPOINT>
+    <STYLEPOINT title="Using eslint">
       <SUMMARY>
         Always
       </SUMMARY>
       <BODY>
-        <p><a href="http://eslint.org/docs/user-guide/getting-started">Learn more here</a>
+        <p>Since nearly every project is worked on by multiple developers it is
+            always a good idea to use eslint to enforce our styleguide for a
+            uniform code syntax.
+        </p>
+      </BODY>
+    </STYLEPOINT>
+    <STYLEPOINT title="Getting started with eslint">
+      <SUMMARY>
+        Helpful Information
+      </SUMMARY>
+      <BODY>
+        <p>Eslint is a npm package and is installed with <code>npm install eslint -g</code>.
+            If you want to extend an existing configuration you have to install it
+            the same way. <a href="http://eslint.org/docs/user-guide/getting-started">Learn more here</a>.
+        </p>
+        <p>Next you have to create a configuration file. This has to be named
+            <code>.eslintrc.js</code> inside your project folder and can look
+            something like this:
+        </p>
+        <CODE_SNIPPET>
+            module.exports = {
+                "extends": "google",
+                "installedESLint": true,
+                "rules": {
+                    "indent":["error", 4]
+                }
+            };
+        </CODE_SNIPPET>
+        <p><code>extends</code> are the rules and configurations that you want to
+            extend from. In this case we extend from the google rules and have
+            to install <code>npm install eslint-config-google -g</code> for this
+            to work. For a deeper look into the configuration option of esling visit
+            <a href="http://eslint.org/docs/user-guide/configuring">the official
+            eslint configuration documentation</a>.
+        </p>
+        <p>In <code>rules</code> we can set our own rules and even overwrite those
+            already provided from the one we are extending. In our example we
+            overwrite the rule for indentation. For a complete list of all possible
+            rules visit <a href="http://eslint.org/docs/rules/">the official eslint
+            documentation</a>.
+        </p>
+        <p>Eslint is executed by <code>eslint [options] [file|dir|glob]*</code>.
+        <a href="http://eslint.org/docs/user-guide/command-line-interface">Here</a>
+        is a complete overview about the possible options.
         </p>
       </BODY>
     </STYLEPOINT>
