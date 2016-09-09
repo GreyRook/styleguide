@@ -1,6 +1,7 @@
 <?xml version = '1.0'?>
 <?xml-stylesheet type="text/xsl" href="styleguide.xsl"?>
 <GUIDE title="Grey Rook JavaScript Style Guide">
+    <p class="revision">GR-1.0, based on Google 2.93</p>
   <address>
       Based on https://google.github.io/styleguide/javascriptguide.xml
   </address>
@@ -735,7 +736,7 @@
         </SUBSECTION>
 
         <SUBSECTION title="Method and function parameter">
-          <p>Optional function arguments should start with <code>opt_</code>.</p>
+          <p>Optional function arguments start with <code>opt_</code>.</p>
           <p>Functions that take a variable number of arguments should have the
             last argument named <code>var_args</code>. You may not refer to
             <code>var_args</code> in the code; use the <code>arguments</code>
@@ -3532,7 +3533,6 @@
             karma</code>. That alone is not enough though, but what you install after
             that is up to you. We recommend using jasmine as testing framework with
             the phantomjs browser. For this you need to install <code>karma-jasmine
-             karma-phantomjs-launcher phantomjs jasmine-corekarma-jasmine
              karma-phantomjs-launcher phantomjs jasmine-core</code> too. For more
              information visit the <a href="https://karma-runner.github.io/latest/intro/installation.html">
              Karma introduction page about installing karma</a>.
@@ -3598,7 +3598,7 @@
         <p>An example output of eslint can look something like this:
         </p>
         <CODE_SNIPPET>
-            [path/to/the/testet/file]
+            [path/to/the/testet/file.js]
             5:31  error  Missing semicolon                                       semi
             7:3   error  Identifier 'my_function' is not in camel case           camelcase
             8:5   error  Expected indentation of 2 space characters but found 4  indent
