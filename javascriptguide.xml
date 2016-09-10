@@ -1,18 +1,9 @@
 <?xml version = '1.0'?>
 <?xml-stylesheet type="text/xsl" href="styleguide.xsl"?>
-<GUIDE title="Google JavaScript Style Guide">
-  <p class="revision">
-
-    Revision 2.93
-  </p>
-
+<GUIDE title="Grey Rook JavaScript Style Guide">
+    <p class="revision">GR-1.0, based on Google 2.93</p>
   <address>
-    Aaron Whyte<br/>
-    Bob Jervis<br/>
-    Dan Pupius<br/>
-    Erik Arvidsson<br/>
-    Fritz Schneider<br/>
-    Robby Walker<br/>
+      Based on https://google.github.io/styleguide/javascriptguide.xml
   </address>
   <OVERVIEW>
     <CATEGORY title="Important Note">
@@ -36,22 +27,15 @@
       <p>
         JavaScript is the main client-side scripting language used
 
-        by many of Google's open-source
+        by many open-source
           projects.
         This style guide is a list of <em>do</em>s and <em>don't</em>s for
         JavaScript programs.
       </p>
 
-
-
-
-
     </CATEGORY>
   </OVERVIEW>
   <CATEGORY title="JavaScript Language Rules">
-
-
-
 
     <STYLEPOINT title="var">
       <SUMMARY>
@@ -135,7 +119,7 @@
                * Request timeout in milliseconds.
                * @type {number}
                */
-              goog.example.TIMEOUT_IN_MILLISECONDS = 60;
+              var TIMEOUT_IN_MILLISECONDS = 60;
             </CODE_SNIPPET>
 
             <p>The number of seconds in a minute never changes.  It is a
@@ -153,7 +137,7 @@
                * Map of URL to response string.
                * @const
                */
-              MyClass.fetchedUrlCache_ = new goog.structs.Map();
+              MyClass._fetchedUrlCache = new Map();
             </CODE_SNIPPET>
 
             <CODE_SNIPPET>
@@ -354,22 +338,27 @@
           prototype. These hierarchies are much harder to get right than they
           first appear! </p>
 
-        <p>For that reason, it is best to use <code>goog.inherits()</code> from
-          <a href="https://code.google.com/closure/library/">
-            the Closure Library
-          </a>
-          or a similar library function.
-        </p>
+        <p>One class can only inherit from one other class. To do this we use the
+            native Javascript prototype and Object ways of inheritance:</p>
         <CODE_SNIPPET>
-          function D() {
-            goog.base(this)
-          }
-          goog.inherits(D, B);
+            function D() {
+                B.call(this);
+                ...
+            }
 
-          D.prototype.method = function() {
-            ...
-          };
+            D.prototype = Object.create(B.prototype);
+
+            D.prototype.method = function() {
+                ...
+            }
         </CODE_SNIPPET>
+
+        <p>In some cases it is necessary to inherit from more than one class. In
+            this case we inherit from one class like above and use GOWN.mixin
+            to merge the prototypes of the other classes into the current class.</p>
+
+        <p>For more Information about GOWN see <a href="https://github.com/brean/gown.js">https://github.com/brean/gown.js</a></p>
+
       </BODY>
     </STYLEPOINT>
 
@@ -411,13 +400,13 @@
       <BODY>
         <CODE_SNIPPET>
           Foo.prototype.dispose = function() {
-            this.property_ = null;
+            this._property = null;
           };
         </CODE_SNIPPET>
         <p>Instead of:</p>
         <BAD_CODE_SNIPPET>
           Foo.prototype.dispose = function() {
-            delete this.property_;
+            delete this._property;
           };
         </BAD_CODE_SNIPPET>
         <p>In modern JavaScript engines, changing the number of properties on an
@@ -733,19 +722,16 @@
         <SUBSECTION title="Properties and methods">
           <ul>
             <li><em>Private</em> properties and methods should be named with a
-              trailing underscore.
+              leading underscore.
               </li>
             <li><em>Protected</em> properties and methods should be
-              named without a trailing underscore (like public ones).</li>
+              named without a leading underscore (like public ones).</li>
           </ul>
           <p>For more information on <em>private</em> and <em>protected</em>,
             read the section on
             <a href="#Visibility__private_and_protected_fields_">
               visibility</a>.
             </p>
-
-
-
 
         </SUBSECTION>
 
@@ -771,6 +757,27 @@
                */
               var foo = { get next() { return this.nextId++; } };
             </BAD_CODE_SNIPPET>
+            <p>We still use getters and setters in combination with properties
+                on objects like follows:</p>
+            <CODE_SNIPPET>
+                MyClass.prototype.getPropertyValue = function() {
+                    return this._propertyValue;
+                };
+
+                MyClass.prototype.setPropertyValue = function(value) {
+                    this._propertyValue = value;
+                };
+
+                Object.defineProperty(MyClass.prototype, 'propertyName', {
+                    'get': getPropertyValue,
+                    'set': setPropertyValue
+                });
+            </CODE_SNIPPET>
+            <p>There also is <code>Object.defineProperties(...)</code> that lets
+            you set multiple properties at once.</p>
+            <p>How this works is if that property is set or called the getter or
+            setter is called. This allows for more control over what properties
+            are available and how and what values are set.</p>
         </SUBSECTION>
 
         <SUBSECTION title="Accessor functions">
@@ -893,8 +900,7 @@
                 staticHelper(new MyClass());
               };
             </CODE_SNIPPET>
-            <p>Do not create local aliases of namespaces. Namespaces should only
-              be aliased using <a href="#goog-scope">goog.scope</a>.</p>
+            <p>Do not create local aliases of namespaces.</p>
             <BAD_CODE_SNIPPET>
               myapp.main = function() {
                 var namespace = some.long.namespace;
@@ -1001,31 +1007,31 @@
             var obj = {a: 1, b: 2, c: 3};  // No space after { or before }.
           </CODE_SNIPPET>
           <p>Multiline array initializers and object initializers are indented
-            2 spaces, with the braces on their own line, just like blocks.</p>
+            4 spaces, with the braces on their own line, just like blocks.</p>
           <CODE_SNIPPET>
             // Object initializer.
             var inset = {
-              top: 10,
-              right: 20,
-              bottom: 15,
-              left: 12
+                top: 10,
+                right: 20,
+                bottom: 15,
+                left: 12
             };
 
             // Array initializer.
-            this.rows_ = [
-              '"Slartibartfast" &lt;fjordmaster@magrathea.com&gt;',
-              '"Zaphod Beeblebrox" &lt;theprez@universe.gov&gt;',
-              '"Ford Prefect" &lt;ford@theguide.com&gt;',
-              '"Arthur Dent" &lt;has.no.tea@gmail.com&gt;',
-              '"Marvin the Paranoid Android" &lt;marv@googlemail.com&gt;',
-              'the.mice@magrathea.com'
+            this._rows = [
+                '"Slartibartfast" &lt;fjordmaster@magrathea.com&gt;',
+                '"Zaphod Beeblebrox" &lt;theprez@universe.gov&gt;',
+                '"Ford Prefect" &lt;ford@theguide.com&gt;',
+                '"Arthur Dent" &lt;has.no.tea@gmail.com&gt;',
+                '"Marvin the Paranoid Android" &lt;marv@googlemail.com&gt;',
+                'the.mice@magrathea.com'
             ];
 
             // Used in a method call.
-            goog.dom.createDom(goog.dom.TagName.DIV, {
-              id: 'foo',
-              className: 'some-css-class',
-              style: 'display:none'
+            dom.createDom(dom.TagName.DIV, {
+                id: 'foo',
+                className: 'some-css-class',
+                style: 'display:none'
             }, 'Hello, world!');
           </CODE_SNIPPET>
           <p>Long identifiers or values present problems for aligned
@@ -1033,17 +1039,17 @@
             For example:</p>
           <CODE_SNIPPET>
             CORRECT_Object.prototype = {
-              a: 0,
-              b: 1,
-              lengthyName: 2
+                a: 0,
+                b: 1,
+                lengthyName: 2
             };
           </CODE_SNIPPET>
           <p>Not like this:</p>
           <BAD_CODE_SNIPPET>
             WRONG_Object.prototype = {
-              a          : 0,
-              b          : 1,
-              lengthyName: 2
+                a          : 0,
+                b          : 1,
+                lengthyName: 2
             };
           </BAD_CODE_SNIPPET>
         </SUBSECTION>
@@ -1108,86 +1114,28 @@
         <SUBSECTION title="Passing Anonymous Functions">
           <p>When declaring an anonymous function in the list of arguments for
             a function call, the body of the function is indented two spaces
-            from the left edge of the statement, or two spaces from the left
+            from the left edge of the statement, or four spaces from the left
             edge of the function keyword. This is to make the body of the
             anonymous function easier to read (i.e. not be all squished up into
             the right half of the screen).</p>
           <CODE_SNIPPET>
             prefix.something.reallyLongFunctionName('whatever', function(a1, a2) {
-              if (a1.equals(a2)) {
-                someOtherLongFunctionName(a1);
-              } else {
-                andNowForSomethingCompletelyDifferent(a2.parrot);
-              }
+                if (a1.equals(a2)) {
+                    someOtherLongFunctionName(a1);
+                } else {
+                    andNowForSomethingCompletelyDifferent(a2.parrot);
+                }
             });
 
             var names = prefix.something.myExcellentMapFunction(
                 verboselyNamedCollectionOfItems,
                 function(item) {
-                  return item.name;
+                    return item.name;
                 });
           </CODE_SNIPPET>
         </SUBSECTION>
-        <SUBSECTION title="Aliasing with goog.scope">
-          <a name="goog-scope"/>
-          <p>
-            <a href="https://docs.google.com/document/pub?id=1ETFAuh2kaXMVL-vafUYhaWlhl6b5D9TOvboVg7Zl68Y"><code>goog.scope</code></a>
-            may be used to shorten references to
-            namespaced symbols in programs using
-            <a href="https://code.google.com/closure/library/">the Closure
-              Library</a>.</p>
-          <p>Only one <code>goog.scope</code> invocation may be added per
-            file.  Always place it in the global scope.</p>
-          <p>The opening <code>goog.scope(function() {</code> invocation
-            must be preceded by exactly one blank line and follow any
-            <code>goog.provide</code> statements, <code>goog.require</code>
-            statements, or top-level comments.  The invocation must be closed on
-            the last line in the file.  Append <code>// goog.scope</code> to the
-            closing statement of the scope. Separate the comment from the
-            semicolon by two spaces.</p>
-          <p>Similar to C++ namespaces, do not indent under goog.scope
-            declarations. Instead, continue from the 0 column.</p>
-          <p>Only alias names that will not be re-assigned to another object
-            (e.g., most constructors, enums, and namespaces). Do not do
-            this (see below for how to alias a constructor):</p>
-
-          <BAD_CODE_SNIPPET>
-            goog.scope(function() {
-            var Button = goog.ui.Button;
-
-            Button = function() { ... };
-            ...
-          </BAD_CODE_SNIPPET>
-
-          <p>Names must be the same as the last property of the global that they
-            are aliasing.</p>
-
-          <CODE_SNIPPET>
-            goog.provide('my.module.SomeType');
-
-            goog.require('goog.dom');
-            goog.require('goog.ui.Button');
-
-            goog.scope(function() {
-            var Button = goog.ui.Button;
-            var dom = goog.dom;
-
-            // Alias new types <b>after</b> the constructor declaration.
-            my.module.SomeType = function() { ... };
-            var SomeType = my.module.SomeType;
-
-            // Declare methods on the prototype as usual:
-            SomeType.prototype.findButton = function() {
-              // Button as aliased above.
-              this.button = new Button(dom.getElement('my-button'));
-            };
-            ...
-            });  // goog.scope
-          </CODE_SNIPPET>
-        </SUBSECTION>
         <SUBSECTION title="Indenting wrapped lines">
-          <p>Except for <a href="#Array_and_Object_literals">array literals,
-            object literals</a>, and anonymous functions, all wrapped lines
+          <p>All wrapped lines
             should be indented either left-aligned to a sibling expression
             above, or four spaces (not two spaces) deeper than a parent
             expression (where "sibling" and "parent" refer to parenthesis
@@ -1241,7 +1189,7 @@
         <SUBSECTION title="Binary and Ternary Operators">
           <p>Always put the operator on the preceding line. Otherwise,
             line breaks and indentation follow the same rules as in other
-            Google style guides. This operator placement was initially agreed
+            Grey Rook style guides. This operator placement was initially agreed
             upon out of concerns about automatic semicolon insertion. In fact,
             semicolon insertion cannot happen before a binary operator, but new
             code should stick to this style for consistency.</p>
@@ -1315,22 +1263,22 @@
           annotated <code>@protected</code>.</p>
         <CODE_SNIPPET>
           // File 1.
-          // AA_PrivateClass_ and AA_init_ are accessible because they are global
+          // _AA_PrivateClass and _AA_init are accessible because they are global
           // and in the same file.
 
           /**
            * @private
            * @constructor
            */
-          AA_PrivateClass_ = function() {
+          _AA_PrivateClass = function() {
           };
 
           /** @private */
-          function AA_init_() {
-            return new AA_PrivateClass_();
+          function _AA_init() {
+            return new _AA_PrivateClass();
           }
 
-          AA_init_();
+          _AA_init();
         </CODE_SNIPPET>
         <p><code>@private</code> properties are accessible to all code in the
           same file, plus all static methods and instance methods of that class
@@ -1350,20 +1298,20 @@
           /** @constructor */
           AA_PublicClass = function() {
             /** @private */
-            this.privateProp_ = 2;
+            this._privateProp = 2;
 
             /** @protected */
             this.protectedProp = 4;
           };
 
           /** @private */
-          AA_PublicClass.staticPrivateProp_ = 1;
+          AA_PublicClass._staticPrivateProp = 1;
 
           /** @protected */
           AA_PublicClass.staticProtectedProp = 31;
 
           /** @private */
-          AA_PublicClass.prototype.privateMethod_ = function() {};
+          AA_PublicClass.prototype._privateMethod = function() {};
 
           /** @protected */
           AA_PublicClass.prototype.protectedMethod = function() {};
@@ -1375,7 +1323,7 @@
            */
           AA_PublicClass.prototype.method = function() {
             // Legal accesses of these two properties.
-            return this.privateProp_ + AA_PublicClass.staticPrivateProp_;
+            return this._privateProp + AA_PublicClass._staticPrivateProp;
           };
 
           // File 3.
@@ -1385,10 +1333,11 @@
            * @extends {AA_PublicClass}
            */
           AA_SubClass = function() {
+            AA_PublicClass.call(this);
             // Legal access of a protected static property.
             AA_PublicClass.staticProtectedProp = this.method();
           };
-          goog.inherits(AA_SubClass, AA_PublicClass);
+          AA_SubClass.prototype = Object.create(AA_PublicClass.prototype);
 
           /**
            * @return {number} The number of ducks we've arranged in a row.
@@ -2070,12 +2019,12 @@
                * @type {Object}
                * @private
                */
-              this.myValue_ = value;
+              this._myValue = value;
             }
           </CODE_SNIPPET>
 
-          <p>tells the compiler that the <code>myValue_</code> property holds
-            either an Object or null.  If <code>myValue_</code> must never be
+          <p>tells the compiler that the <code>_myValue</code> property holds
+            either an Object or null.  If <code>_myValue</code> must never be
             null, it should be declared like this:</p>
 
           <CODE_SNIPPET>
@@ -2090,7 +2039,7 @@
                * @type {!Object}
                * @private
                */
-              this.myValue_ = value;
+              this._myValue = value;
             }
           </CODE_SNIPPET>
 
@@ -2116,7 +2065,7 @@
                * @type {Object|undefined}
                * @private
                */
-              this.myValue_ = opt_value;
+              this._myValue = opt_value;
             }
           </CODE_SNIPPET>
 
@@ -3024,7 +2973,7 @@
                      * Handlers that are listening to this logger.
                      * @private {!Array.&lt;Function&gt;}
                      */
-                    this.handlers_ = [];
+                    this._handlers = [];
                   </CODE_SNIPPET>
                 </td>
                 <td>
@@ -3072,7 +3021,7 @@
                      * @suppress {visiblity} Referencing this outside this package is strongly
                      * discouraged.
                      */
-                     goog.events.Event.prototype.propagationStopped_ = false;
+                     goog.events.Event.prototype._propagationStopped = false;
                   </CODE_SNIPPET>
                 </td>
                 <td>
@@ -3302,12 +3251,8 @@
                 </td>
               </tr>
 
-
-
             </tbody>
           </table>
-
-
 
           <p>
             You may also see other types of JSDoc annotations in third-party
@@ -3315,7 +3260,7 @@
             <a href="https://code.google.com/p/jsdoc-toolkit/wiki/TagReference">
               JSDoc Toolkit Tag Reference
             </a>
-            but are currently discouraged in Google code. You should consider
+            but are currently discouraged in Grey Rook code. You should consider
             them "reserved" names for future use. These include:
             <ul>
               <li>@augments</li>
@@ -3348,51 +3293,13 @@
       </BODY>
     </STYLEPOINT>
 
-    <STYLEPOINT title="Providing Dependencies With goog.provide">
-      <SUMMARY>
-        Only provide top-level symbols.
-      </SUMMARY>
-      <BODY>
-        <p>
-          All members defined on a class should be in the same file. So, only
-          top-level classes should be provided in a file that contains multiple
-          members defined on the same class (e.g. enums, inner classes, etc).
-        </p>
-        <p>Do this:</p>
-        <CODE_SNIPPET>
-          goog.provide('namespace.MyClass');
-        </CODE_SNIPPET>
-        <p>Not this:</p>
-        <BAD_CODE_SNIPPET>
-          goog.provide('namespace.MyClass');
-          goog.provide('namespace.MyClass.Enum');
-          goog.provide('namespace.MyClass.InnerClass');
-          goog.provide('namespace.MyClass.TypeDef');
-          goog.provide('namespace.MyClass.CONSTANT');
-          goog.provide('namespace.MyClass.staticMethod');
-        </BAD_CODE_SNIPPET>
-        <p>
-          Members on namespaces may also be provided:
-        </p>
-        <CODE_SNIPPET>
-          goog.provide('foo.bar');
-          goog.provide('foo.bar.method');
-          goog.provide('foo.bar.CONSTANT');
-        </CODE_SNIPPET>
-      </BODY>
-    </STYLEPOINT>
-
     <STYLEPOINT title="Compiling">
       <SUMMARY>Required</SUMMARY>
       <BODY>
 
-
         <p>Use of JS compilers such as the
           <a href="https://code.google.com/closure/compiler/">Closure Compiler</a>
           is required for all customer-facing code.</p>
-
-
-
 
       </BODY>
     </STYLEPOINT>
@@ -3582,8 +3489,184 @@
       </BODY>
     </STYLEPOINT>
   </CATEGORY>
+  <CATEGORY title="Karma Unit Tests">
+    <STYLEPOINT title="What are (Karma) Unit Tests">
+      <SUMMARY>
+        What it's all about
+      </SUMMARY>
+      <BODY>
+        <p>With unit tests the smallest unit inside of your code is tested. This
+          is typically a function or a module. The test itself checks if, given
+          an input, the unit returns the expected output or behaves in an expected
+          way.
+        </p>
+        <p>For code to be testable by unit tests it has to be written in a modular
+          way. Code in this form is very easily tested because each module can
+          be tested separately.
+        </p>
+        <p>With unit tests errors are made visible. If executed regularly after
+          changes errors from unexpected dependencies are made visible. This way
+          the functionality of the tested code is always ensured.
+        </p>
+      </BODY>
+    </STYLEPOINT>
+    <STYLEPOINT title="Using Karma Unit Tests">
+      <SUMMARY>
+        As often as possible
+      </SUMMARY>
+      <BODY>
+        <p>Not everything is easily tested with Karma Unit Tests. But where it is
+          possible it should be used. For this the code itself has to be written
+          in a modular way what makes it easier to understand too.
+        </p>
+        <p>It's a good way to write the tests first and then develop the code until
+          all tests pass.
+        </p>
+      </BODY>
+    </STYLEPOINT>
+    <STYLEPOINT title="Getting started with Karma">
+        <SUMMARY>
+          Helpful information
+        </SUMMARY>
+        <BODY>
+          <p>Karma is a node module and is installed as such with <code>npm install
+            karma</code>. That alone is not enough though, but what you install after
+            that is up to you. We recommend using jasmine as testing framework with
+            the phantomjs browser. For this you need to install <code>karma-jasmine
+             karma-phantomjs-launcher phantomjs jasmine-core</code> too. For more
+             information visit the <a href="https://karma-runner.github.io/latest/intro/installation.html">
+             Karma introduction page about installing karma</a>.
+          </p>
+          <p>The configuration file needed for Karma is easily generated
+            by <code>Karma init my.conf.js</code>. For more information about the
+            configuration file visit the <a href="https://karma-runner.github.io/latest/intro/configuration.html">
+            Karma introduction page about the Karma configuration</a>.
+          </p>
+          <p>To start Karma just type <code>karma start [path/to/config]</code>
+            into the terminal. If you call karma in the same folder as the config
+            and the config has the default name (karma.conf.js) you can omit the
+            path to the config.</p>
+          <p><a href="https://git.srv.r0k.de/m.friedrich/karma_example">Here</a>
+            you can find an example project for Karma.</p>
+        </BODY>
+    </STYLEPOINT>
 
+    <STYLEPOINT title="Jasmine">
+        <SUMMARY>
+          The way unit tests are written
+        </SUMMARY>
+        <BODY>
+          <p>Jasmine is the framework that provides the structure and actual
+            testing mechanics to write tests with karma. A basic test written
+            with Jasmine might look something like this:
+          </p>
+          <CODE_SNIPPET>
+            describe('My first Karma Test', function() {
 
+                it('Test add function', function() {
+                    expect(add(3, 3)).toBe(6);
+                });
+            });
+          </CODE_SNIPPET>
+          <p>With <code>describe</code> you can define test-blocks, consisting
+            of multiple unit tests and with <code>it</code> a unit test is defined.
+            Inside you can test as much and as little as you want, but it makes
+            sense to have one unit tests for each test-case to increase readability
+            of the executed unit tests.
+          </p>
+          <p>Inside of unit tests Jasmine provides many ways to check values.
+            <a href="http://jasmine.github.io/2.4/introduction.html">Go here</a>
+            to learn what is possible.
+          </p>
+        </BODY>
+    </STYLEPOINT>
+  </CATEGORY>
+  <CATEGORY title="Eslint">
+      <STYLEPOINT title="What is Eslint?">
+        <SUMMARY>
+        A short introduction
+        </SUMMARY>
+        <BODY>
+        <p>You might ask yourself: what is eslint and why do I need it? Well,
+          the way karma ensures the correct functionality (or semantic) of
+          your code eslint ensures that your code is in the correct syntax.
+          So even if your code has the correct semantic and works just fine,
+          eslint can find things that are not the way you want them to be.
+          It is a good way to enforce a styleguide for your project for every
+          developer who contributes to it.
+        </p>
+        <p>An example output of eslint can look something like this:
+        </p>
+        <CODE_SNIPPET>
+            [path/to/the/testet/file.js]
+            5:31  error  Missing semicolon                                       semi
+            7:3   error  Identifier 'my_function' is not in camel case           camelcase
+            8:5   error  Expected indentation of 2 space characters but found 4  indent
+            9:2   error  Missing semicolon                                       semi
+
+            ✖ 4 problems (4 errors, 0 warnings)
+        </CODE_SNIPPET>
+        <p>There are errors and warnings. Errors have to be corrected, warnings
+            can be ignored (although we do not recommend this). At the end of each
+            line the rule that caused the error is displayed. These rules can
+            be provided by you or you use a public configuration. In this case
+            the esling configuration of google was used.
+        </p>
+        </BODY>
+      </STYLEPOINT>
+    <STYLEPOINT title="Using eslint">
+      <SUMMARY>
+        Always
+      </SUMMARY>
+      <BODY>
+        <p>Since nearly every project is worked on by multiple developers it is
+            always a good idea to use eslint to enforce our styleguide for a
+            uniform code syntax.
+        </p>
+      </BODY>
+    </STYLEPOINT>
+    <STYLEPOINT title="Getting started with eslint">
+      <SUMMARY>
+        Helpful Information
+      </SUMMARY>
+      <BODY>
+        <p>Eslint is a npm package and is installed with <code>npm install eslint -g</code>.
+            If you want to extend an existing configuration you have to install it
+            the same way. <a href="http://eslint.org/docs/user-guide/getting-started">Learn more here</a>.
+        </p>
+        <p>Next you have to create a configuration file. This has to be named
+            <code>.eslintrc.js</code> inside your project folder and can look
+            something like this:
+        </p>
+        <CODE_SNIPPET>
+            module.exports = {
+                "extends": "google",
+                "installedESLint": true,
+                "rules": {
+                    "indent":["error", 4]
+                }
+            };
+        </CODE_SNIPPET>
+        <p><code>extends</code> are the rules and configurations that you want to
+            extend from. In this case we extend from the google rules and have
+            to install <code>npm install eslint-config-google -g</code> for this
+            to work. For a deeper look into the configuration option of esling visit
+            <a href="http://eslint.org/docs/user-guide/configuring">the official
+            eslint configuration documentation</a>.
+        </p>
+        <p>In <code>rules</code> we can set our own rules and even overwrite those
+            already provided from the one we are extending. In our example we
+            overwrite the rule for indentation. For a complete list of all possible
+            rules visit <a href="http://eslint.org/docs/rules/">the official eslint
+            documentation</a>.
+        </p>
+        <p>Eslint is executed by <code>eslint [options] [file|dir|glob]*</code>.
+        <a href="http://eslint.org/docs/user-guide/command-line-interface">Here</a>
+        is a complete overview about the possible options.
+        </p>
+      </BODY>
+    </STYLEPOINT>
+  </CATEGORY>
 
   <PARTING_WORDS>
     <p>
@@ -3609,18 +3692,4 @@
     </p>
 
   </PARTING_WORDS>
-
-  <p align="right">
-    Revision 2.93
-  </p>
-
-
-  <address>
-    Aaron Whyte<br/>
-    Bob Jervis<br/>
-    Dan Pupius<br/>
-    Erik Arvidsson<br/>
-    Fritz Schneider<br/>
-    Robby Walker<br/>
-  </address>
 </GUIDE>
