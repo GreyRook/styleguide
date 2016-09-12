@@ -37,7 +37,7 @@ for more details.
 [r]: https://greyrook.github.io/styleguide/Rguide.xml
 [sh]: https://greyrook.github.io/styleguide/shell.xml
 [htmlcss]: https://greyrook.github.io/styleguide/htmlcssguide.xml
-[js]: https://greyrook.greyrook.io/styleguide/javascriptguide.xml
+[js]: https://greyrook.github.io/styleguide/javascriptguide.xml
 [angular]: https://greyrook.github.io/styleguide/angularjs-google-style.html
 [cl]: https://greyrook.github.io/styleguide/lispguide.xml
 [vim]: https://greyrook.github.io/styleguide/vimscriptguide.xml
